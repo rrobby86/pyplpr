@@ -8,11 +8,31 @@
   table-layout: fixed;
 }
 
+.p3table td {
+  border: 1pt solid black;
+  margin: 0pt;
+}
+
+.p3month {
+  background-color: yellow;
+  font-weight: bold;
+  text-transform: uppercase;
+  text-align: center;
+}
+
 .p3dayrow {
   height: 30px;
 }
 
-.p3table td {
-  border: 1pt solid black;
-  margin: 0pt;
+.p3holiday {
+  background-color: #ffbbbb;
+}
+
+.p3weekend {
+  background-color: #ffdddd;
+}
+
+.p3daylabel {
+  font-family: monospace;
+  font-size: small;
 }

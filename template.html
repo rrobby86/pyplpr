@@ -1,0 +1,31 @@
+<!DOCTYPE html
+<html lang="en">
+<title>Planner</title>
+<link rel="stylesheet" type="text/css", href="style.css">
+</head>
+<body>
+<table class="p3table">
+<tr class="p3header">
+{% for month in monthnames %}
+<td class="p3month">{{ month }}</td>
+{% endfor %}
+</tr>
+{% for day in range(31) %}
+<tr class="p3dayrow">
+{% for month in range(12) %}
+{% if day < daycount[month] %}
+{% set dow = (firstdow[month] + day) % 7 %}
+{% set holiday = dow == 6 %}
+{% set weekend = dow == 5 %}
+<td class="p3day{% if holiday %} p3holiday{% elif weekend %} p3weekend{% endif %}">
+<div class="p3daylabel">{{ downames[dow][0] | upper }}{{ "%2d" | format(day+1) }}</div>
+</td>
+{% else %}
+<td class="p3empty"></td>
+{% endif %}
+{% endfor %}
+</tr>
+{% endfor %}
+</table>
+</body>
+</html>

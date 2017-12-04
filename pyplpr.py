@@ -33,28 +33,10 @@ def make_data(year, country=None, providers={}):
     return data
 
 def renderer_html(out, data):
-    print('<!DOCTYPE html', file=out)
-    print('<html lang="en">', file=out)
-    print('<title>Planner</title>', file=out)
-    print('<link rel="stylesheet" type="text/css", href="style.css">', file=out)
-    print('</head>', file=out)
-    print('<body>', file=out)
-    print('<table class="p3table">', file=out)
-    print('<tr class="p3header">', file=out)
-    for month in data["monthnames"]:
-        print('<td>{}</td>'.format(month), file=out)
-    print('</tr>', file=out)
-    for day in range(31):
-        print('<tr class="p3dayrow">', file=out)
-        for month in range(12):
-            if day < data["daycount"][month]:
-                print('<td class="p3day">{}{:2}</td>'.format(data["downames"][(data["firstdow"][month] + day) % 7][0].upper(), day+1), file=out)
-            else:
-                print('<td class="p3empty"></td>', file=out)
-        print('</tr>', file=out)
-    print('</table>', file=out)
-    print('</body>', file=out)
-    print('</html>', file=out)
+    from jinja2 import Environment, PackageLoader
+    env = Environment(loader=PackageLoader(__name__, ''))
+    template = env.get_template("template.html")
+    template.stream(data).dump(out)
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
