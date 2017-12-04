@@ -11,6 +11,7 @@
 .p3table td {
   border: 1pt solid black;
   margin: 0pt;
+  position: relative;
 }
 
 .p3month {
@@ -35,4 +36,12 @@
 .p3daylabel {
   font-family: monospace;
   font-size: small;
+}
+
+.p3holidayname {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 50%;
+  font-style: italic;
 }

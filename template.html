@@ -15,10 +15,14 @@
 {% for month in range(12) %}
 {% if day < daycount[month] %}
 {% set dow = (firstdow[month] + day) % 7 %}
-{% set holiday = dow == 6 %}
+{% set holidayname = holidays[(month, day)] %}
+{% set holiday = dow == 6 or holidayname %}
 {% set weekend = dow == 5 %}
 <td class="p3day{% if holiday %} p3holiday{% elif weekend %} p3weekend{% endif %}">
 <div class="p3daylabel">{{ downames[dow][0] | upper }}{{ "%2d" | format(day+1) }}</div>
+{% if holidayname %}
+<div class="p3holidayname">{{ holidayname }}</div>
+{% endif %}
 </td>
 {% else %}
 <td class="p3empty"></td>

@@ -15,6 +15,16 @@ def provider_downames_python(country):
     return [locale.nl_langinfo(getattr(locale, "DAY_" + str(i%7+1)))
             for i in range(1, 8)]
 
+def provider_holidays_enrico(country, year):
+    from urllib import request
+    import json
+    url = "http://kayaposoft.com/enrico/json/v1.0/?action=getPublicHolidaysForYear&year={}&country={}&region=" \
+            .format(year, country)
+    with request.urlopen(url) as url:
+        data = json.loads(url.read().decode())
+    return [(h["date"]["month"]-1, h["date"]["day"]-1, h["localName"])
+            for h in data]
+
 def locate_provider(key, name):
     return globals()["provider_{}_{}".format(key, name)]
 
@@ -33,6 +43,8 @@ def make_data(year, country=None, providers={}):
     return data
 
 def renderer_html(out, data):
+    if "holidays" in data:
+        data["holidays"] = {(m, d): name for (m, d, name) in data["holidays"]}
     from jinja2 import Environment, PackageLoader
     env = Environment(loader=PackageLoader(__name__, ''))
     template = env.get_template("template.html")
@@ -45,10 +57,14 @@ if __name__ == "__main__":
                         help="calendar year (default: year of next month)")
     parser.add_argument("-l", "--locale",
                         help="calendar locale (default: system locale)")
+    parser.add_argument("-n", "--holidays",
+                        help="include holidays of specified nation")
     args = parser.parse_args()
     if not args.year:
         from datetime import date, timedelta
         args.year = (date.today() + timedelta(days=31)).year
     data = make_data(args.year, args.locale)
+    if args.holidays:
+        data["holidays"] = provider_holidays_enrico(args.holidays, args.year)
     with open("test.html", "wt") as output:
         renderer_html(output, data)
