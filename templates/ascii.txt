@@ -1,0 +1,20 @@
+{% set colwidth = 16 %}
+{% macro hline() %}+{% for c in range(12) %}{% for i in range(colwidth) %}-{% endfor %}+{% endfor %}{% endmacro %}
+{% macro spaces(n) %}{% for i in range(n) %} {% endfor %}{% endmacro %}
+{{ hline() }}
+|{% for month in monthnames %}{{ month | upper | center(colwidth) }}|{% endfor %}
+{% for day in range(31) %}
+
+{{ hline() }}
+|{% for month in range(12) %}
+{% if day < daycount[month] %}
+{% set dow = (firstdow[month] + day) % 7 %}
+{{ downames[dow][0] | upper }}{{ "%2d" | format(day+1) }}{{ spaces(colwidth-3) -}}
+{% else %}
+{{ spaces(colwidth) -}}
+{% endif %}
+|{% endfor %}
+{% endfor %}
+
+{{ hline() }}
+
