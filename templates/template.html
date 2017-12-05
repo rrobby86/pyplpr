@@ -1,7 +1,9 @@
-<!DOCTYPE html
+<!DOCTYPE html>
 <html lang="en">
 <title>Planner</title>
-<link rel="stylesheet" type="text/css", href="style.css">
+<style type="text/css">
+{% include "style.css" %}
+</style>
 </head>
 <body>
 <table class="p3table">
@@ -15,7 +17,7 @@
 {% for month in range(12) %}
 {% if day < daycount[month] %}
 {% set dow = (firstdow[month] + day) % 7 %}
-{% set holidayname = holidays[(month, day)] %}
+{% set holidayname = holidays[(month+1, day+1)] if holidays else null %}
 {% set holiday = dow == 6 or holidayname %}
 {% set weekend = dow == 5 %}
 <td class="p3day{% if holiday %} p3holiday{% elif weekend %} p3weekend{% endif %}">

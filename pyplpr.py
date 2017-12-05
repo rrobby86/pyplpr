@@ -22,8 +22,8 @@ def provider_holidays_enrico(country, year):
             .format(year, country)
     with request.urlopen(url) as url:
         data = json.loads(url.read().decode())
-    return [(h["date"]["month"]-1, h["date"]["day"]-1, h["localName"])
-            for h in data]
+    return {(h["date"]["month"], h["date"]["day"]): h["localName"]
+            for h in data}
 
 def locate_provider(key, name):
     return globals()["provider_{}_{}".format(key, name)]
@@ -43,10 +43,8 @@ def make_data(year, country=None, providers={}):
     return data
 
 def renderer_html(out, data):
-    if "holidays" in data:
-        data["holidays"] = {(m, d): name for (m, d, name) in data["holidays"]}
     from jinja2 import Environment, PackageLoader
-    env = Environment(loader=PackageLoader(__name__, ''))
+    env = Environment(loader=PackageLoader(__name__, 'templates'))
     template = env.get_template("template.html")
     template.stream(data).dump(out)
 
@@ -59,6 +57,8 @@ if __name__ == "__main__":
                         help="calendar locale (default: system locale)")
     parser.add_argument("-n", "--holidays",
                         help="include holidays of specified nation")
+    parser.add_argument("-o", "--output",
+                        help="name of output file (default: standard output)")
     args = parser.parse_args()
     if not args.year:
         from datetime import date, timedelta
@@ -66,5 +66,9 @@ if __name__ == "__main__":
     data = make_data(args.year, args.locale)
     if args.holidays:
         data["holidays"] = provider_holidays_enrico(args.holidays, args.year)
-    with open("test.html", "wt") as output:
-        renderer_html(output, data)
+    if args.output:
+        with open(args.output, "wt") as output:
+            renderer_html(output, data)
+    else:
+        import sys
+        renderer_html(sys.stdout, data)
