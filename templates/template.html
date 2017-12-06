@@ -1,9 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <title>Planner</title>
+{% if extstyle %}
+<link rel="stylesheet" type="text/css" href="{{ extstyle }}">
+{% else %}
 <style type="text/css">
 {% include "style.css" %}
 </style>
+{% endif %}
 </head>
 <body>
 <table class="p3table">

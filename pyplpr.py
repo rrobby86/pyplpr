@@ -45,18 +45,31 @@ def make_data(year, country=None, providers={}):
                         for month in range(1, 13)]
     return data
 
-def jinja_renderer(template_file, **env_options):
-    def result(out, data):
+def jinja_renderer(template_file, default_opts={}, **env_options):
+    def result(out, data, **options):
         from jinja2 import Environment, PackageLoader
         env = Environment(loader=PackageLoader(__name__, "templates"),
                 **env_options)
         template = env.get_template(template_file)
+        for key, val in default_opts.items():
+            if key in options:
+                val = type(val)(options.pop(key))
+            data[key] = val
+        if options:
+            if len(options) <= 3:
+                raise Exception("Unrecognized style options: " +
+                                ", ".join(options.keys()))
+            else:
+                raise Exception("{} unrecognized style options"
+                                .format(len(options)))
         template.stream(data).dump(out)
     return result
 
-renderer_html = jinja_renderer("template.html", trim_blocks=True)
+renderer_html = jinja_renderer("template.html", {"extstyle": ""},
+                               trim_blocks=True)
 
-renderer_ascii = jinja_renderer("ascii.txt", trim_blocks=True)
+renderer_ascii = jinja_renderer("ascii.txt", {"colwidth": 16},
+                                trim_blocks=True)
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
@@ -69,6 +82,8 @@ if __name__ == "__main__":
                         help="include holidays of specified nation")
     parser.add_argument("-f", "--format", default="html",
                         help="output format (default: html)")
+    parser.add_argument("-s", "--style", action="append",
+                        help="comma-separated format-specific options")
     parser.add_argument("-o", "--output",
                         help="name of output file (default: standard output)")
     args = parser.parse_args()
@@ -79,9 +94,21 @@ if __name__ == "__main__":
     if args.holidays:
         data["holidays"] = provider_holidays_enrico(args.holidays, args.year)
     renderer = locate_provider("renderer", args.format)
+    format_opts = {}
+    if args.style:
+        import re
+        from shlex import shlex
+        re_opt = re.compile("([a-zA-z_][a-zA-Z_0-9]*)(?:=(.+))?")
+        for s in args.style:
+            lexer = shlex(s, posix=True)
+            lexer.whitespace_split = True
+            lexer.whitespace = ","
+            for opt in lexer:
+                key, val = re_opt.fullmatch(opt).groups()
+                format_opts[key] = val if val is not None else True
     if args.output:
         with open(args.output, "wt") as output:
-            renderer(output, data)
+            renderer(output, data, **format_opts)
     else:
         import sys
-        renderer(sys.stdout, data)
+        renderer(sys.stdout, data, **format_opts)

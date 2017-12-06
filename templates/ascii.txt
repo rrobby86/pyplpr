@@ -1,4 +1,3 @@
-{% set colwidth = 16 %}
 {% macro hline() %}+{% for c in range(12) %}{% for i in range(colwidth) %}-{% endfor %}+{% endfor %}{% endmacro %}
 {% macro spaces(n) %}{% for i in range(n) %} {% endfor %}{% endmacro %}
 {{ hline() }}
@@ -17,4 +16,4 @@
 {% endfor %}
 
 {{ hline() }}
-
+{# blank lines intentional #}
