@@ -3,6 +3,20 @@ default_providers = {
     "downames": "python"
 }
 
+def urlopen(*args, **kwargs):
+    if "_urlopen" not in globals():
+        global _urlopen
+        try:
+            from urllib.request import urlopen
+            dourlopen = urlopen
+        except ImportError:
+            from urllib import urlopen
+            from contextlib import closing
+            def dourlopen(*args, **kwargs):
+                return closing(urlopen(*args, **kwargs))
+        _urlopen = dourlopen
+    return _urlopen(*args, **kwargs)
+
 def provider_monthnames_python(country):
     import locale
     locale.setlocale(locale.LC_ALL, (country, "UTF-8"))
@@ -16,12 +30,11 @@ def provider_downames_python(country):
             for i in range(1, 8)]
 
 def provider_holidays_enrico(country, year):
-    from urllib import request
     import json
     url = "http://kayaposoft.com/enrico/json/v1.0/" \
             "?action=getPublicHolidaysForYear&year={}&country={}&region=" \
             .format(year, country)
-    with request.urlopen(url) as url:
+    with urlopen(url) as url:
         data = json.loads(url.read().decode())
     return {(h["date"]["month"], h["date"]["day"]): h["localName"]
             for h in data}
@@ -62,7 +75,11 @@ def jinja_renderer(template_file, default_opts={}, **env_options):
             else:
                 raise Exception("{} unrecognized style options"
                                 .format(len(options)))
-        template.stream(data).dump(out)
+        from sys import version_info
+        if version_info.major >= 3:
+            template.stream(data).dump(out) # fails in py2
+        else:
+            out.write(template.render(data, encoding="utf-8"))
     return result
 
 renderer_html = jinja_renderer("template.html", {"extstyle": ""},
@@ -78,13 +95,14 @@ if __name__ == "__main__":
                         help="calendar year (default: year of next month)")
     parser.add_argument("-l", "--locale",
                         help="calendar locale (default: system locale)")
-    parser.add_argument("-n", "--holidays",
-                        help="include holidays of specified nation")
+    parser.add_argument("-n", "--holidays", metavar="country",
+                        help="include holidays of country with specified ISO" \
+                        " 3166-1 alpha-3 code")
     parser.add_argument("-f", "--format", default="html",
                         help="output format (default: html)")
-    parser.add_argument("-s", "--style", action="append",
+    parser.add_argument("-s", "--style", action="append", metavar="opts",
                         help="comma-separated format-specific options")
-    parser.add_argument("-o", "--output",
+    parser.add_argument("-o", "--output", metavar="file",
                         help="name of output file (default: standard output)")
     args = parser.parse_args()
     if not args.year:
@@ -107,7 +125,8 @@ if __name__ == "__main__":
                 key, val = re_opt.fullmatch(opt).groups()
                 format_opts[key] = val if val is not None else True
     if args.output:
-        with open(args.output, "wt") as output:
+        from io import open
+        with open(args.output, "wt", encoding="utf-8") as output:
             renderer(output, data, **format_opts)
     else:
         import sys

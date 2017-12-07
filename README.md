@@ -12,11 +12,24 @@
 
 Names of months and days of week are obtained from the `locale` module in Python. Dates and names of national holidays (if requested) are retrieved from [Enrico Service](http://kayaposoft.com/enrico/).
 
-pyplpr is meant to be easily extensible with new "providers" of information about local names and holidays and with new output formats.
+pyplpr is meant to be easily extensible with new "providers" of information about local names and holidays and with new output formats. Output for included formats is produced using the [Jinja2](http://jinja.pocoo.org/) template engine.
 
 Launch the script with the `-h` command line argument to get a list of the available options.
 
-At the moment, the script has been tested to work on Linux with Python 3.5 or higher.
+At the moment, the script has been tested to work on Linux with Python 2.7 or 3.5+ and requires to manually install Jinja2 (`pip install Jinja2`).
+
+Command line options
+--------------------
+
+Use the `-h` option to print the list of available options.
+
+You can specify the calendar year as an argument; if not specified, the next year is assumed if current month is December, the current year is assumed otherwise.
+
+- `-l`: explicitly set the locale for names of months and days of week, e.g. `-l it` or `-l en_US`, it must be installed in the system
+- `-n`: specify 3-letters code of country for which national holidays must be included, e.g. `-l ita` or `-l usa`
+- `-f`: set the output format, default is `html`, see supported formats below
+- `-s`: set options for the used format, e.g. `extstyle=planner.css`, see below
+- `-o`: set name of output file, standard output is used if not given
 
 Supported output formats and options
 ------------------------------------
