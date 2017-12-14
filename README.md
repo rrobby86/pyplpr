@@ -38,3 +38,4 @@ Supported output formats and options
   - **extstyle**: if specified, replace embedded CSS with a link to a named file
 - **ascii**: ASCII characters-based table
   - **colwidth**: characters per column
+- **latex**: LaTeX source file of landscape A3 page *(requires pdflatex to generate a usable PDF)*

@@ -1,0 +1,44 @@
+\documentclass[landscape]{article}
+
+\usepackage[a3paper,margin=2cm]{geometry}
+\usepackage{tabularx}
+\usepackage[table]{xcolor}
+
+\pagestyle{empty}
+
+\newlength\rowheight
+\setlength\rowheight{0.031\textheight}
+\setlength\tabcolsep{0pt}
+
+\definecolor{plmonth}{HTML}{888888}
+\definecolor{plholiday}{HTML}{CCCCCC}
+\definecolor{plweekend}{HTML}{EEEEEE}
+
+\newcommand\plm[1]{\cellcolor{plmonth}\parbox[b][.6\rowheight][c]{\linewidth}{\centering\sffamily\bfseries #1}}
+\newcommand\pld[1]{\parbox[b][\rowheight][c]{\linewidth}{\ttfamily #1}}
+
+\begin{document}
+
+\def\arraystretch{0}\noindent%
+\begin{tabularx}{\textwidth}{|X|X|X|X|X|X|X|X|X|X|X|X|}
+\hline
+{% for month in monthnames %}\plm{ {{ month | upper }} } {% if not loop.last %}& {% endif %}{% endfor %} \\
+\hline
+\hline
+{% for day in range(31) %}
+{% for month in range(12) %}
+{% if day < daycount[month] %}
+{% set dow = (firstdow[month] + day) % 7 %}
+{% set holidayname = holidays[(month+1, day+1)] if holidays else null %}
+{% set holiday = dow == 6 or holidayname %}
+{% set weekend = dow == 5 %}
+{% if holiday %}\cellcolor{plholiday}{% elif weekend %}\cellcolor{plweekend}{% endif %}
+\pld{ {{ downames[dow][0] | upper }}{{ "%2d" | format(day+1) | replace(" ", "~") }} }
+{% endif %}{% if not loop.last %} &{% endif %}
+{% endfor %}
+\\
+\hline
+{% endfor %}
+\end{tabularx}
+
+\end{document}

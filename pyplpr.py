@@ -81,6 +81,8 @@ renderer_html = jinja_renderer("template.html", {"extstyle": ""},
 renderer_ascii = jinja_renderer("ascii.txt", {"colwidth": 16},
                                 trim_blocks=True)
 
+renderer_latex = jinja_renderer("latex-tabularx.tex", {}, trim_blocks=True)
+
 if __name__ == "__main__":
     from argparse import ArgumentParser
     parser = ArgumentParser()
